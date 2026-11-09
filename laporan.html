@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan & Rekapitulasi - Kelola Stok & Belanja Rumah Mudah</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navbar Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top d-print-none">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="dashboard.html"><i class="fa-solid fa-boxes-packing me-2"></i>Kelola Stok & Belanja Rumah Mudah</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="data.html">Data Barang</a></li>
+          <li class="nav-item"><a class="nav-link" href="mutasi.html">Mutasi & Belanja</a></li>
+          <li class="nav-item"><a class="nav-link active" href="laporan.html">Laporan</a></li>
+        </ul>
+        <div class="d-flex align-items-center text-white">
+          <span class="me-3 small"><i class="fa-solid fa-user me-1"></i> <strong id="userDisplayName">User</strong></span>
+          <button id="btnLogout" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-right-from-bracket me-1"></i> Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-4">
+    <!-- Header Halaman -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2><i class="fa-solid fa-file-lines text-primary me-2"></i>Laporan Rekapitulasi Inventaris</h2>
+        <p class="text-muted mb-0">Ringkasan keseluruhan stok barang dan daftar kebutuhan</p>
+      </div>
+      <button class="btn btn-secondary d-print-none" onclick="window.print()">
+        <i class="fa-solid fa-print me-1"></i> Cetak Laporan
+      </button>
+    </div>
+
+    <!-- Ringkasan Kategori -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-primary text-white fw-bold">
+            Rekap Stok Berdasarkan Kategori
+          </div>
+          <div class="card-body p-0">
+            <ul class="list-group list-group-flush" id="listRekapKategori">
+              <!-- Render via JS -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-dark text-white fw-bold">
+            Ringkasan Mutasi Terakhir
+          </div>
+          <div class="card-body p-0">
+            <ul class="list-group list-group-flush" id="listRekapMutasi">
+              <!-- Render via JS -->
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabel Rekap Lengkap Barang -->
+    <div class="card shadow-sm">
+      <div class="card-header bg-light fw-bold">
+        Daftar Seluruh Inventory & Status Stok
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle mb-0">
+            <thead class="table-secondary">
+              <tr>
+                <th>No</th>
+                <th>Nama Barang</th>
+                <th>Kategori</th>
+                <th>Lokasi</th>
+                <th>Stok Saat Ini</th>
+                <th>Stok Minimum</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="tblRekapBarang">
+              <!-- Render via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // 1. Tampilkan Nama User yang Sedang Login
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (currentUser && currentUser.nama) {
+        document.getElementById('userDisplayName').textContent = currentUser.nama;
+      }
+
+      // 2. Fungsi Tombol Logout
+      const btnLogout = document.getElementById('btnLogout');
+      if (btnLogout) {
+        btnLogout.addEventListener('click', function() {
+          if (confirm('Apakah Anda yakin ingin keluar (logout)?')) {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+          }
+        });
+      }
+
+      // 3. Ambil Data dari LocalStorage
+      const daftarBarang = JSON.parse(localStorage.getItem('daftarBarang')) || [];
+      const riwayatMutasi = JSON.parse(localStorage.getItem('riwayatMutasi')) || [];
+
+      // 4. Render Rekap Berdasarkan Kategori
+      const listRekapKategori = document.getElementById('listRekapKategori');
+      listRekapKategori.innerHTML = "";
+
+      if (daftarBarang.length === 0) {
+        listRekapKategori.innerHTML = `<li class="list-group-item text-muted text-center py-3">Belum ada data barang.</li>`;
+      } else {
+        // Hitung total stok per kategori
+        let kategoriMap = {};
+        daftarBarang.forEach(item => {
+          let kat = item.kategori || 'Tanpa Kategori';
+          let stok = parseInt(item.stok || 0);
+          if (!kategoriMap[kat]) {
+            kategoriMap[kat] = { totalStok: 0, jumlahJenis: 0 };
+          }
+          kategoriMap[kat].totalStok += stok;
+          kategoriMap[kat].jumlahJenis += 1;
+        });
+
+        for (let kat in kategoriMap) {
+          listRekapKategori.innerHTML += `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>${kat}</strong>
+                <span class="text-muted small d-block">${kategoriMap[kat].jumlahJenis} jenis barang</span>
+              </div>
+              <span class="badge bg-primary rounded-pill">Total Stok: ${kategoriMap[kat].totalStok}</span>
+            </li>
+          `;
+        }
+      }
+
+      // 5. Render Ringkasan Mutasi Terakhir
+      const listRekapMutasi = document.getElementById('listRekapMutasi');
+      listRekapMutasi.innerHTML = "";
+
+      if (riwayatMutasi.length === 0) {
+        listRekapMutasi.innerHTML = `<li class="list-group-item text-muted text-center py-3">Belum ada riwayat mutasi.</li>`;
+      } else {
+        // Ambil 5 mutasi terakhir
+        let mutasiTerbaru = riwayatMutasi.slice(0, 5);
+        mutasiTerbaru.forEach(m => {
+          let badge = m.jenis === 'MASUK' ? '<span class="badge bg-success">MASUK</span>' : '<span class="badge bg-danger">KELUAR</span>';
+          listRekapMutasi.innerHTML += `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>${m.namaBarang}</strong> (${m.jumlah})
+                <span class="text-muted small d-block">${m.tanggal} - ${m.keterangan}</span>
+              </div>
+              <div>${badge}</div>
+            </li>
+          `;
+        });
+      }
+
+      // 6. Render Tabel Seluruh Inventory & Status Stok
+      const tblRekapBarang = document.getElementById('tblRekapBarang');
+      tblRekapBarang.innerHTML = "";
+
+      if (daftarBarang.length === 0) {
+        tblRekapBarang.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Belum ada data inventaris.</td></tr>`;
+      } else {
+        daftarBarang.forEach((item, index) => {
+          let stok = parseInt(item.stok || 0);
+          let stokMin = parseInt(item.stokMin || 5);
+          let statusBadge = stok <= stokMin ? '<span class="badge bg-danger">Kritis / Perlu Dibeli</span>' : '<span class="badge bg-success">Aman</span>';
+
+          tblRekapBarang.innerHTML += `
+            <tr>
+              <td>${index + 1}</td>
+              <td class="fw-bold">${item.namaBarang || item.nama}</td>
+              <td>${item.kategori || '-'}</td>
+              <td>Utama / Gudang</td>
+              <td>${stok}</td>
+              <td>${stokMin}</td>
+              <td>${statusBadge}</td>
+            </tr>
+          `;
+        });
+      }
+    });
+  </script>
+</body>
+</html>

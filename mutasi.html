@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mutasi Stok & Daftar Belanja</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navbar Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="dashboard.html"><i class="fa-solid fa-boxes-packing me-2"></i>Kelola Stok & Belanja Rumah Mudah</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="data.html">Data Barang</a></li>
+          <li class="nav-item"><a class="nav-link active" href="mutasi.html">Mutasi & Belanja</a></li>
+          <li class="nav-item"><a class="nav-link" href="laporan.html">Laporan</a></li>
+        </ul>
+        <div class="d-flex align-items-center text-white">
+          <span class="me-3 small"><i class="fa-solid fa-user me-1"></i> <strong class="userDisplayName">User</strong></span>
+          <a href="login.html" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-right-from-bracket me-1"></i> Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-4">
+    <!-- Header Halaman -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h2><i class="fa-solid fa-arrow-right-arrow-left text-primary me-2"></i>Mutasi Stok & Daftar Belanja</h2>
+      </div>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalMutasi">
+        <i class="fa-solid fa-plus me-1"></i> Catat Stok Masuk / Keluar
+      </button>
+    </div>
+
+    <!-- Bagian 1: Daftar Belanja Otomatis -->
+    <div class="card shadow-sm mb-4 border-warning">
+      <div class="card-header bg-warning text-dark fw-bold d-flex justify-content-between align-items-center">
+        <span><i class="fa-solid fa-cart-shopping me-2"></i>Daftar Belanja Otomatis (Barang dengan Stok & Minimum)</span>
+        <span class="badge bg-dark" id="badgeJumlahBelanja">0 Barang</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Nama Barang</th>
+                <th>Kategori</th>
+                <th>Stok Sisa</th>
+                <th>Stok Min</th>
+                <th>Lokasi</th>
+                <th>Status Belanja</th>
+                <th class="text-center">Aksi Cepat</th>
+              </tr>
+            </thead>
+            <tbody id="tblDaftarBelanja">
+              <!-- Render otomatis via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bagian 2: Riwayat Mutasi Stok -->
+    <div class="card shadow-sm">
+      <div class="card-header bg-dark text-white fw-bold">
+        <i class="fa-solid fa-history me-2"></i>Riwayat Perubahan Stok (Mutasi)
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Tanggal & Waktu</th>
+                <th>Nama Barang</th>
+                <th>Jenis Mutasi</th>
+                <th>Jumlah</th>
+                <th>Keterangan</th>
+              </tr>
+            </thead>
+            <tbody id="tblMutasi">
+              <!-- Render otomatis via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CATAT MUTASI STOK -->
+  <div class="modal fade" id="modalMutasi" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="formMutasi">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">Catat Perubahan Stok</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Pilih Barang</label>
+              <select id="mutasiBarangId" class="form-select" required>
+                <option value="">-- Pilih Barang --</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Jenis Perubahan</label>
+              <select id="mutasiJenis" class="form-select" required>
+                <option value="MASUK">Stok Masuk (+ Restock / Beli)</option>
+                <option value="KELUAR">Stok Keluar (- Dipakai / Rusak)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Jumlah (Qty)</label>
+              <input type="number" id="mutasiJumlah" class="form-control" min="1" required placeholder="Masukkan jumlah">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Keterangan / Catatan</label>
+              <input type="text" id="mutasiKeterangan" class="form-control" placeholder="Contoh: Belanja bulanan / Terpakai">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan Mutasi</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // 1. Render Tabel Daftar Belanja Otomatis (Stok <= Stok Min)
+      function renderDaftarBelanja() {
+        const daftarBarang = JSON.parse(localStorage.getItem("daftarBarang")) || [];
+        const tbodyBelanja = document.getElementById("tblDaftarBelanja");
+        const badgeJumlah = document.getElementById("badgeJumlahBelanja");
+        
+        tbodyBelanja.innerHTML = "";
+        let barangBelanja = daftarBarang.filter(item => {
+          let stok = parseInt(item.stok || 0);
+          let stokMin = parseInt(item.stokMin || 5);
+          return stok <= stokMin;
+        });
+
+        badgeJumlah.textContent = `${barangBelanja.length} Barang`;
+
+        if (barangBelanja.length === 0) {
+          tbodyBelanja.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Semua stok barang aman (di atas batas minimum).</td></tr>`;
+          return;
+        }
+
+        barangBelanja.forEach(item => {
+          tbodyBelanja.innerHTML += `
+            <tr>
+              <td class="fw-bold">${item.namaBarang || item.nama}</td>
+              <td>${item.kategori || '-'}</td>
+              <td><span class="badge bg-danger">${item.stok}</span></td>
+              <td>${item.stokMin || 5}</td>
+              <td>Rumah / Utama</td>
+              <td><span class="badge bg-warning text-dark">Perlu Dibeli</span></td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-success" onclick="restockCepat('${item.namaBarang || item.nama}')">
+                  <i class="fa-solid fa-cart-plus"></i> Restock
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // 2. Render Tabel Riwayat Mutasi
+      function renderRiwayatMutasi() {
+        const riwayatMutasi = JSON.parse(localStorage.getItem("riwayatMutasi")) || [];
+        const tbodyMutasi = document.getElementById("tblMutasi");
+        
+        tbodyMutasi.innerHTML = "";
+
+        if (riwayatMutasi.length === 0) {
+          tbodyMutasi.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Belum ada riwayat mutasi stok.</td></tr>`;
+          return;
+        }
+
+        riwayatMutasi.forEach(mutasi => {
+          let badgeJenis = mutasi.jenis === 'MASUK' ? '<span class="badge bg-success">MASUK (+)</span>' : '<span class="badge bg-danger">KELUAR (-)</span>';
+          tbodyMutasi.innerHTML += `
+            <tr>
+              <td>${mutasi.tanggal}</td>
+              <td class="fw-bold">${mutasi.namaBarang}</td>
+              <td>${badgeJenis}</td>
+              <td>${mutasi.jumlah}</td>
+              <td>${mutasi.keterangan}</td>
+            </tr>
+          `;
+        });
+      }
+
+      // Panggil fungsi render saat halaman dibuka
+      renderDaftarBelanja();
+      renderRiwayatMutasi();
+
+      // 3. Mengisi Dropdown Barang saat Modal Mutasi Dibuka
+      const modalMutasi = document.getElementById('modalMutasi');
+      if (modalMutasi) {
+        modalMutasi.addEventListener('show.bs.modal', function () {
+          const selectBarang = document.getElementById("mutasiBarangId");
+          const daftarBarang = JSON.parse(localStorage.getItem("daftarBarang")) || [];
+          
+          selectBarang.innerHTML = '<option value="" selected disabled>-- Pilih Barang --</option>';
+          
+          if (daftarBarang.length === 0) {
+            selectBarang.innerHTML = '<option value="" disabled>Belum ada data barang. Silakan isi di Kelola Data.</option>';
+          } else {
+            daftarBarang.forEach(barang => {
+              const option = document.createElement("option");
+              option.value = barang.id || barang.namaBarang; 
+              option.textContent = `${barang.namaBarang || barang.nama} (Stok: ${barang.stok})`; 
+              selectBarang.appendChild(option);
+            });
+          }
+        });
+      }
+
+      // 4. Handle Simpan Mutasi Form
+      const formMutasi = document.getElementById('formMutasi');
+      if (formMutasi) {
+        formMutasi.addEventListener('submit', function (e) {
+          e.preventDefault();
+
+          const selectedValue = document.getElementById('mutasiBarangId').value;
+          const jenisMutasi = document.getElementById('mutasiJenis').value;
+          const jumlah = parseInt(document.getElementById('mutasiJumlah').value);
+          const keterangan = document.getElementById('mutasiKeterangan').value;
+
+          let daftarBarang = JSON.parse(localStorage.getItem("daftarBarang")) || [];
+          let riwayatMutasi = JSON.parse(localStorage.getItem("riwayatMutasi")) || [];
+
+          // Cari dan update stok barang
+          let namaBarangDipilih = "";
+          daftarBarang = daftarBarang.map(barang => {
+            if (barang.id == selectedValue || barang.namaBarang == selectedValue || barang.nama == selectedValue) {
+              namaBarangDipilih = barang.namaBarang || barang.nama;
+              let currentStok = parseInt(barang.stok || 0);
+              if (jenisMutasi === 'MASUK') {
+                barang.stok = currentStok + jumlah;
+              } else {
+                barang.stok = Math.max(0, currentStok - jumlah);
+              }
+            }
+            return barang;
+          });
+
+          // Simpan update stok barang ke localStorage
+          localStorage.setItem("daftarBarang", JSON.stringify(daftarBarang));
+
+          // Tambah ke riwayat mutasi
+          const mutasiBaru = {
+            tanggal: new Date().toLocaleString('id-ID'),
+            namaBarang: namaBarangDipilih || selectedValue,
+            jenis: jenisMutasi,
+            jumlah: jumlah,
+            keterangan: keterangan || '-'
+          };
+
+          riwayatMutasi.unshift(mutasiBaru);
+          localStorage.setItem("riwayatMutasi", JSON.stringify(riwayatMutasi));
+
+          // Tutup modal dan reset form
+          const modalInstance = bootstrap.Modal.getInstance(modalMutasi);
+          if (modalInstance) modalInstance.hide();
+          formMutasi.reset();
+
+          // Refresh tampilan tabel
+          renderDaftarBelanja();
+          renderRiwayatMutasi();
+        });
+      }
+    });
+
+    // Fungsi tombol restock cepat dari daftar belanja otomatis
+    function restockCepat(namaBarang) {
+      let daftarBarang = JSON.parse(localStorage.getItem("daftarBarang")) || [];
+      let riwayatMutasi = JSON.parse(localStorage.getItem("riwayatMutasi")) || [];
+
+      daftarBarang = daftarBarang.map(barang => {
+        if ((barang.namaBarang || barang.nama) === namaBarang) {
+          barang.stok = parseInt(barang.stok || 0) + 10; // Tambah 10 stok otomatis
+        }
+        return barang;
+      });
+
+      localStorage.setItem("daftarBarang", JSON.stringify(daftarBarang));
+
+      riwayatMutasi.unshift({
+        tanggal: new Date().toLocaleString('id-ID'),
+        namaBarang: namaBarang,
+        jenis: 'MASUK',
+        jumlah: 10,
+        keterangan: 'Restock Cepat dari Daftar Belanja'
+      });
+      localStorage.setItem("riwayatMutasi", JSON.stringify(riwayatMutasi));
+
+      location.reload();
+    }
+  </script>
+</body>
+</html>
