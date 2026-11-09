@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mutasi Stok & Daftar Belanja </title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navbar Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="dashboard.html"><i class="fa-solid fa-boxes-packing me-2"></i>Kelola Stok & Belanja Rumah Mudah</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="data.html">Data Barang </a></li>
+          <li class="nav-item"><a class="nav-link active" href="mutasi.html">Mutasi & Belanja</a></li>
+          <li class="nav-item"><a class="nav-link" href="laporan.html">Laporan</a></li>
+        </ul>
+        <div class="d-flex align-items-center text-white">
+          <span class="me-3 small"><i class="fa-solid fa-user me-1"></i> <strong class="userDisplayName">User</strong></span>
+          <button class="btnLogout btn btn-outline-light btn-sm"><i class="fa-solid fa-right-from-bracket me-1"></i> Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-4">
+    <!-- Header Halaman -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h2><i class="fa-solid fa-arrow-right-arrow-left text-primary me-2"></i>Mutasi Stok & Daftar Belanja</h2>
+        <span class="badge bg-secondary"></span>
+      </div>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalMutasi">
+        <i class="fa-solid fa-plus me-1"></i> Catat Stok Masuk / Keluar
+      </button>
+    </div>
+
+    <!-- Bagian 1: Daftar Belanja Otomatis (FR-04 & FR-06) -->
+    <div class="card shadow-sm mb-4 border-warning">
+      <div class="card-header bg-warning text-dark fw-bold d-flex justify-content-between align-items-center">
+        <span><i class="fa-solid fa-cart-shopping me-2"></i>Daftar Belanja Otomatis (Barang dengan Stok & Minimum)</span>
+        <span class="badge bg-dark" id="badgeJumlahBelanja">0 Barang</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Nama Barang</th>
+                <th>Kategori</th>
+                <th>Stok Sisa</th>
+                <th>Stok Min</th>
+                <th>Lokasi</th>
+                <th>Status Belanja (FR-06)</th>
+                <th class="text-center">Aksi Cepat</th>
+              </tr>
+            </thead>
+            <tbody id="tblDaftarBelanja">
+              <!-- Render otomatis via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bagian 2: Riwayat Mutasi Stok (FR-03 & FR-07) -->
+    <div class="card shadow-sm">
+      <div class="card-header bg-dark text-white fw-bold">
+        <i class="fa-solid fa-history me-2"></i>Riwayat Perubahan Stok (Mutasi)
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Tanggal & Waktu</th>
+                <th>Nama Barang</th>
+                <th>Jenis Mutasi</th>
+                <th>Jumlah</th>
+                <th>Keterangan</th>
+              </tr>
+            </thead>
+            <tbody id="tblMutasi">
+              <!-- Render otomatis via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CATAT MUTASI STOK -->
+  <div class="modal fade" id="modalMutasi" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="formMutasi">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">Catat Perubahan Stok</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Pilih Barang</label>
+              <select id="mutasiBarangId" class="form-select" required>
+              <option value="">-- Pilih Barang --</option>
+            </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Jenis Perubahan</label>
+              <select id="mutasiJenis" class="form-select" required>
+                <option value="MASUK">Stok Masuk (+ Restock / Beli)</option>
+                <option value="KELUAR">Stok Keluar (- Dipakai / Rusak)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Jumlah (Qty)</label>
+              <input type="number" id="mutasiJumlah" class="form-control" min="1" required placeholder="Masukkan jumlah">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Keterangan / Catatan</label>
+              <input type="text" id="mutasiKeterangan" class="form-control" placeholder="Contoh: Belanja bulanan / Terpakai">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan Mutasi</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+<!-- ... bagian atas kode HTML Anda ... -->
+
+    </div> <!-- Penutup div modal atau container utama -->
+
+    <!-- 1. TEMPATKAN KODE DI SINI (Sebelum tag script bootstrap/js utama Anda atau sebelum tag body) -->
+    <script>
+      const modalMutasiElement = document.getElementById('modalMutasi');
+      
+      if (modalMutasiElement) {
+        modalMutasiElement.addEventListener('show.bs.modal', function () {
+          const selectBarang = document.getElementById("mutasiBarangId");
+          const daftarBarang = JSON.parse(localStorage.getItem("daftarBarang")) || [];
+          
+          selectBarang.innerHTML = '<option value="" selected disabled>-- Pilih Barang --</option>';
+          
+          if (daftarBarang.length === 0) {
+            selectBarang.innerHTML = '<option value="" disabled>Belum ada data barang. Silakan isi di Kelola Data.</option>';
+          } else {
+            daftarBarang.forEach(barang => {
+              const option = document.createElement("option");
+              option.value = barang.id; 
+              option.textContent = barang.namaBarang; 
+              selectBarang.appendChild(option);
+            });
+          }
+        });
+      }
+    </script>
+
+    <!-- Biasanya di bawah sini ada script Bootstrap bawaan seperti ini -->
+  </body> <!-- BATAS AKHIR FILE -->
+</html>
